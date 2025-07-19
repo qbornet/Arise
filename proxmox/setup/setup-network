@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# vim :set ft=sh:
+
+if [ $(id -u) != 0 ]; then
+	echo "Run script as root"
+	exit 1
+fi
+
+if [ $(cat /proc/sys/net/ipv4/ip_forward) -ne 1 ]; then
+	echo 1 > /proc/sys/net/ipv4/ip_forward
+fi
+
+cp nat /etc/network/if-up.d/
+ifup vmbr1

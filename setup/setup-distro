@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# vim :set ft=sh:
+
+if [ $(id -u) != 0 ]; then
+	echo "Run script as root"
+	exit 1
+fi
+
+apk -U upgrade
+apk -U add vim file openjdk21
+
+mkdir /minecraft
+cd /minecraft
