@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+# vim :set ft=sh:
+
+# Check if you are root.
+if [ $(id -u) != 0 ]; then
+	echo "Run script as root"
+	exit 1
+fi
+
+apk -U upgrade
+
+# uncomment the community repo
+awk 'NR>1 {print p} {p=$0} END {sub(/^#/, "", p); print p}' /etc/apk/repositories > /tmp/repo.tmp && mv /tmp/repo.tmp /etc/apk/repositories
+
+# update the apk
+apk -U add bash vim file openjdk21 jemalloc
+
+mkdir /minecraft
+cd /minecraft
+
+wget https://piston-data.mojang.com/v1/objects/4707d00eb834b446575d89a61a11b5d548d8c001/server.jar
+
+echo "eula=true" > eula.txt
