@@ -1,1 +1,5 @@
+# default swap file
 *.sw?
+
+# go executable
+autofwd-daemon
