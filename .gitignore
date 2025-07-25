@@ -3,3 +3,7 @@
 
 # go executable
 autofwd-daemon
+
+# log & pid
+*.pid
+*.log

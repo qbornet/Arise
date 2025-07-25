@@ -1,4 +1,5 @@
 RM := rm
+LOG := autofwd-daemon.log
 NAME := autofwd-daemon
 
 
@@ -11,6 +12,9 @@ build: $(NAME)
 clean:
 	$(RM) $(NAME)
 
-re: clean build
+clean-log:
+	$(RM) $(LOG)
 
-.PHONY: build clean
+re: clean clean-log build
+
+.PHONY: build clean clean-log
