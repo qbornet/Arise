@@ -4,7 +4,8 @@ NAME := autofwd-daemon
 
 
 $(NAME): main.go
-	go build -o $@ .
+	CGO_ENABLED=0 go build -ldflags="-extldflags=-static" -o $@ . 
+	/usr/bin/upx $@
 
 
 build: $(NAME)

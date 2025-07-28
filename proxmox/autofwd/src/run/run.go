@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 )
 
 const FILE_DNSMASQ = "/var/lib/misc/dnsmasq.leases"
@@ -43,6 +44,7 @@ func Start() error {
 		logger.Fatalf("%s", err)
 	}
 	for true {
+		time.Sleep(time.Second * 5)
 		if rw.Available() == 0 {
 			rw, err = lib.OpenFile(FILE_DNSMASQ)
 			if err != nil {
@@ -68,18 +70,6 @@ func Start() error {
 			ips = append(ips, ip)
 			continue
 		}
-		/*
-			validIps, err := checkGamePortOpened(ips)
-			if err != nil {
-				logger.Errf("game port failure: %s", err)
-				continue
-			}
-			// Need to ip forward from their
-			for _, ip := range validIps {
-				infos := strings.Split(ip, ":")
-				ForwardPort(infos[0], infos[1])
-			}
-		*/
 	}
 	return nil
 }

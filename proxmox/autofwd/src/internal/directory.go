@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"autofwd/src/logger"
 	"bufio"
 	"fmt"
 	"os"
@@ -32,12 +33,11 @@ func OpenFile(path string) (*bufio.ReadWriter, error) {
 		if !mod.Perm().IsRegular() {
 			return nil, fmt.Errorf("error file is not regular file")
 		}
-		allPerm := (uint32)(mod & 0700)
-		writeAndRead := (uint32)(mod & 0600)
-		if allPerm != 0700 || writeAndRead != 0600 {
+
+		logger.Printf("mod: %d, mod is writeable: %d\n", mod, mod&0200)
+		if mod&0200 == 0 {
 			return nil, fmt.Errorf("error file doesn't have user permision to read and write")
 		}
-
 	}
 	o, err := os.Open(path)
 	if err != nil {
