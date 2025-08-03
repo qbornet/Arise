@@ -11,12 +11,12 @@ import (
 func CreateDirectory(path string) error {
 	s, err := os.Stat(path)
 	if err != nil {
-		if err = os.Mkdir(path, 0644); err != nil {
+		if err = os.Mkdir(path, 0o644); err != nil {
 			return fmt.Errorf("error failed to create %s: %s", path, err)
 		}
 	}
 	if !s.IsDir() {
-		if err = os.Mkdir(path, 0644); err != nil {
+		if err = os.Mkdir(path, 0o644); err != nil {
 			return fmt.Errorf("error failed to create %s: %s", path, err)
 		}
 	}

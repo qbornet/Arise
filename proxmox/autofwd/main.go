@@ -12,12 +12,11 @@ import (
 
 func main() {
 	ctx := &daemon.Context{
-		PidFileName: "autofwd-daemon.pid",
-		PidFilePerm: 0644,
-		LogFileName: "autofwd-daemon.log",
-		LogFilePerm: 0640,
-		WorkDir:     "./",
-		Umask:       027,
+		PidFileName: "/var/run/autofwd-daemon.pid",
+		PidFilePerm: 0o644,
+		LogFileName: "/var/log/autofwd-daemon.log",
+		LogFilePerm: 0o640,
+		Umask:       022,
 	}
 	if err := logger.InitWithFile(nil, true); err != nil {
 		log.Fatalln("error with logger init with file")

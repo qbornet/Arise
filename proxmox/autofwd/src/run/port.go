@@ -3,6 +3,7 @@ package run
 import (
 	"autofwd/src/logger"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net"
@@ -22,8 +23,10 @@ const (
 )
 
 var (
-	portStart int          = PORT_START
-	usedPort  map[int]bool = make(map[int]bool)
+	portStart int                           = PORT_START
+	usedPort  map[int]bool                  = make(map[int]bool)
+	contextIp map[string]context.Context    = make(map[string]context.Context)
+	cancelIp  map[string]context.CancelFunc = make(map[string]context.CancelFunc)
 )
 
 type GamePort struct {
@@ -177,9 +180,7 @@ func removePrerouting(ip, port string) error {
 	}
 
 	trim := strings.TrimSpace(string(out))
-	logger.Debugf("result: [%s]", trim)
-	cmd_string := fmt.Sprintf("iptables -t nat %s", "-D"+string(out[2:]))
-	logger.Debugf("removed prerouting rules: %s", cmd_string)
+	cmd_string := fmt.Sprintf("iptables -t nat %s", "-D"+trim)
 	if err := exec.Command("/usr/bin/env", "sh", "-c", cmd_string).Run(); err != nil {
 		return fmt.Errorf("error couldn't execute command: %s", err)
 	}
@@ -203,7 +204,6 @@ func iptablesPrerouting(cfg *DNATConfig, gameport string) error {
 	if err := exec.Command("/usr/bin/env", "sh", "-c", command_string).Run(); err != nil {
 		return err
 	}
-	logger.Debugf("port %d added to port used", port)
 	usedPort[port] = true
 	return nil
 }
@@ -245,13 +245,29 @@ func TestingPort(ips []string) (validIPs map[int]bool, mapPorts map[int][]string
 		count := 0
 		timeout := time.Second
 		for val := 0; val < rt.NumField(); val++ {
+			var conn net.Conn
+
+			conn = nil
 			field := rt.Field(val)
 			rv := reflect.ValueOf(gp)
 			value := reflect.Indirect(rv).FieldByName(field.Name)
-			conn, err := net.DialTimeout("tcp", net.JoinHostPort(ip, value.String()), timeout)
-			if err != nil {
-				logger.Errf("error failed to connect: %s", err)
-				continue
+			ctx, ok := contextIp[ip]
+			if (ok && ctx.Err() != nil) || !ok {
+				conn, _ = net.DialTimeout("tcp", net.JoinHostPort(ip, value.String()), timeout)
+
+				// Remove from map before adding.
+				cancel, ok := cancelIp[ip]
+				if ok {
+					cancel()
+					delete(cancelIp, ip)
+				}
+				_, ok = contextIp[ip]
+				if ok {
+					delete(contextIp, ip)
+				}
+				ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+				contextIp[ip] = ctx
+				cancelIp[ip] = cancel
 			}
 			if conn != nil {
 				mapRet[i] = true

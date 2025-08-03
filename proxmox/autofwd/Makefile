@@ -6,6 +6,7 @@ NAME := autofwd-daemon
 $(NAME): main.go
 	CGO_ENABLED=0 go build -ldflags="-extldflags=-static" -o $@ . 
 	/usr/bin/upx $@
+	scp ./$(NAME) root@141.94.97.54:/root
 
 
 build: $(NAME)
